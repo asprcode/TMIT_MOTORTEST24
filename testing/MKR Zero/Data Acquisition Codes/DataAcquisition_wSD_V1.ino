@@ -4,15 +4,6 @@
 #define LOAD          A3
 #define PRESSURE      A5
 
-// State Machine Definition
-typedef enum {
-  SAFE,
-  ARMED,
-  LAUNCHED,
-  FAILURE
-} STATE;
-STATE currentState = SAFE;
-
 // Object Instantiations
 File logFile;
 String response;
