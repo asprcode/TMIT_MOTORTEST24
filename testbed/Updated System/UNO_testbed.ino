@@ -130,9 +130,21 @@ void checkInput(String receive)
   
   if (receive == "ARM" && currentState == SAFE) 
   {
-    Serial.println("CURRENT STATE: ARMED");
-    currentState = ARMED;
-    sendState("TESTBED STATE: ARMED");
+    digitalWrite(N_ENABLE, LOW);
+    while(!(ucComm.available()||digitalRead(ACK)==LOW));
+    if(digitalRead(ACK)==LOW)
+    {
+      Serial.println("CURRENT STATE: ARMED");
+      currentState = ARMED;
+      sendState("TESTBED STATE: ARMED");
+      return;
+    }
+    else
+    {
+      Serial.println("MKRZero didnt respond to signal");  
+      currentState = FAILURE;
+      sendState("ERR=1; TESTBED STATE: FAILURE");
+    }
     return;
   }
   if (receive == "DISARM" && currentState == ARMED) 
@@ -144,21 +156,9 @@ void checkInput(String receive)
   }
   if (receive == "LAUNCH" && currentState == ARMED) 
   {
-    digitalWrite(N_ENABLE, LOW);
-    while(!(ucComm.available()||digitalRead(ACK)==LOW));
-    if(digitalRead(ACK)==LOW)
-    {
-      Serial.println("CURRENT STATE: LAUNCHED");
-      currentState = LAUNCHED;
-      sendState("TESTBED STATE: LAUNCHED");
-      return;
-    }
-    else
-    {
-      Serial.println("MKRZero didnt respond to launch signal");  
-      currentState = FAILURE;
-      sendState("ERR=1; TESTBED STATE: FAILURE");
-    }
+    Serial.println("CURRENT STATE: LAUNCHED");
+    currentState = LAUNCHED;
+    sendState("TESTBED STATE: LAUNCHED");
   }
   if (receive == "DONE" && currentState == LAUNCHED) 
   {
@@ -220,7 +220,7 @@ void performOperations()
       break;
 
     case LAUNCHED:
-      // Serial.println("D4184s LATCHED");
+      Serial.println("D4184s LATCHED");
       digitalWrite(D4184A, HIGH);
       digitalWrite(D4184B, HIGH);
 
@@ -256,6 +256,9 @@ void setup()
   pinMode(CS2, OUTPUT);
   pinMode(N_ENABLE, OUTPUT);
   pinMode(ACK, INPUT);
+
+  pinMode(D4184A, OUTPUT);
+  pinMode(D4184B, OUTPUT);
 
   digitalWrite(N_ENABLE, HIGH);
 

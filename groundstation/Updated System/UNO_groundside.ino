@@ -6,7 +6,6 @@
 #define TX_RYLR       4
 #define ARM_SW        2
 #define LCH_SW        7
-// #define RYLR          Serial1
 
 SoftwareSerial RYLR (RX_RYLR, TX_RYLR);
 
@@ -59,6 +58,10 @@ void checkTestbed() {
       currentState = LAUNCHED;
       Serial.println("GROUND STATE: LAUNCHED");
     }
+    else if (response.equals("TESTBED STATE: DONE")) {
+      currentState = LAUNCHED;
+      Serial.println("GROUND STATE: DONE");
+    }
     else if (response.equals("ERR=1; TESTBED STATE: FAILURE")) {
       currentState = FAILURE;
       Serial.println("GROUND STATE: FAILURE");
@@ -110,14 +113,15 @@ void checkInput() {
       }
       break;
     case LAUNCHED:
-        while(1) {
-          checkTestbed();
-          if(Serial.available()) {
-            String input = Serial.readStringUntil('\n');
-            if (input == "DONE")
-              currentState = DONE;
-          }
+        checkTestbed();
+        if(Serial.available()) {
+          String input = Serial.readStringUntil('\n');
+          if (input == "DONE")
+            sendState("DONE");
         }
+      break;
+    case DONE:
+      Serial.println("LFGGG");
       break;
     default:
       break;
